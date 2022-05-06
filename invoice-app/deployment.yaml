@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invoice-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: invoice-app
+  template:
+    metadata:
+      labels:
+        app: invoice-app
+    spec:
+      containers:
+      - name: main
+        image: invoice-app:latest
+        imagePullPolicy: IfNotPresent
+      securityContext:
+        runAsNonRoot: true

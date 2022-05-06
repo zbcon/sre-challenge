@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-provider
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: payment-provider
+  template:
+    metadata:
+      labels:
+        app: payment-provider
+    spec:
+      containers:
+      - name: main
+        image: payment-provider:latest
+        imagePullPolicy: IfNotPresent
+      securityContext:
+        runAsNonRoot: true
