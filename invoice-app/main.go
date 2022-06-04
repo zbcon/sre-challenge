@@ -8,6 +8,7 @@ import (
 	"pleo.io/invoice-app/db"
 
 	"github.com/gin-gonic/gin"
+	"os"
 )
 
 func main() {
@@ -45,7 +46,9 @@ func pay(c *gin.Context) {
 		}
 		b, err := json.Marshal(req)
 		data := bytes.NewBuffer(b)
-		_, err = client.Post("http://payment-provider:8082/payments/pay", "application/json", data)
+		targetsvc := os.ExpandEnv("http://$PAYMENT_PROVIDER_HOSTPORT/payments/pay")
+        fmt.Printf("payment-provider service: [%s]\n", targetsvc)
+		_, err = client.Post(targetsvc, "application/json", data)
 
 		if err != nil {
 			fmt.Printf("Error %s", err)

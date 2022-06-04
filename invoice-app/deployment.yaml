@@ -16,5 +16,8 @@ spec:
       - name: main
         image: invoice-app:latest
         imagePullPolicy: IfNotPresent
+        env:
+          - name: "PAYMENT_PROVIDER_HOSTPORT"
+            value: "payment-provider:8082"
       securityContext:
         runAsNonRoot: true
