@@ -49,6 +49,20 @@ payment-provider-abcdef1234-1ab25   1/1     Ready                        0      
 #### Requirements
 
 Write here about the :bug:, the fix, how you found it, and anything else you want to share about it.
+> **The problem:**  
+>The security context constraints require both apps to run as non-root, but the images are configured to run as root, and so Kubernetes does not launch the pods.  
+> 
+> **How I found it:**  
+> Ostensibly the Dockerfile look fine, and builds from the outset.
+> Checking the deployment YAML before launching, it also looks fine without any obvious errors (when considered alone).
+> After launching, I probed the failing pods to reveal the error message `container has runAsNonRoot and image will run as root`.
+> It is immediately obvious the problem is in the USER of the Dockerfile being root.  
+> I've had projects building Helm charts for applications, and so spent time crafting suitable SCCs for the deployment and hitting similar problems before.
+> 
+> **The fix:**  
+> There are two fixes: either remove the requirement for the pods to run as non-root, or adjust the images to not run as root.  
+> I opted for the latter and adjusted the Dockerfiles, because generally it is better for containers not to be running as root.  
+
 
 ### Part 2 - Setup the apps
 
