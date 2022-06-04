@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: invoice-svc
+spec:
+  selector:
+      app: invoice-app
+  type: NodePort
+  ports:
+    - name: invoice
+      port: 8081
+      targetPort: 8081
