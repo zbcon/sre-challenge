@@ -6,4 +6,6 @@ RUN apk add build-base
 RUN GOOS=linux
 RUN go build -o app .
 
+USER 1002
+
 ENTRYPOINT ["./app"]
