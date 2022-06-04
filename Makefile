@@ -10,3 +10,7 @@ invoice:
 
 pay:
 	curl -X POST `minikube service invoice-svc --url`/invoices/pay
+
+reboot:
+	kubectl delete deployment invoice-app
+	kubectl apply -f invoice-app/deployment.yaml
