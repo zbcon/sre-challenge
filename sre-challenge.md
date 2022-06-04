@@ -12,17 +12,16 @@ Server Version: v1.23.3
 I use `brew` to handle the install and update of all the packages except _VirtualBox_.
 As I had an older setup of Minikube already present, I already had _VirtualBox_ installed, I just ran an internal update to grab the latest version. 
 
-**Before starting Minikube**, run these commands to adjust how _VirtualBox_ handles dns resolution:
-```shell
-VBoxManage modifyvm "minikube" --natdnshostresolver1 off
-VBoxManage modifyvm "minikube" --natdnsproxy1 on
-```
-
-Start minikube with:
-```shell
- minikube start --driver=virtualbox
-```
-
+**To resolve DNS resolution issue** with VritualBox, start Minikube as follows:
+1. Start Minikube to create the VirtuaalBox profile:  
+   `minikube start --driver=virtualbox`
+1. Stop Minikube, to allow changes to _VirtualBox_:  
+   `minikube stop`
+1. Run these commands, to adjust how _VirtualBox_ handles DNS resolution:  
+   `VBoxManage modifyvm "minikube" --natdnshostresolver1 off`  
+   `VBoxManage modifyvm "minikube" --natdnsproxy1 on`
+1. Restart Ninikube k8 cluster:  
+   `Minikube start`
 ### Setup Debugging
 If you are only interested in replicating the setup, then the information above should be sufficient and you do not need to read this subsection.
 If you want to understand _why_ I ended up with this setup, I've included my debugging process and some thoughts along the way.
