@@ -31,6 +31,7 @@ In this repo, we provide you with:
 1. Fork this repository
 2. Create a new branch for you to work with.
 3. Install any local K8s cluster (ex: Minikube) on your machine and document your setup, so we can run your solution.
+> Documented setup of Minikube, plus some comments on decision-making for this setup, in the included `minikube_setup.md` file
 
 ### Part 1 - Fix the issue
 
