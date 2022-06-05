@@ -110,6 +110,65 @@ Feel free to express your thoughts and share your experiences with real-world ex
 2. There are 2 microservices that are maintained by 2 different teams. Each team should have access only to their service inside the cluster. How would you approach this?
 3. How would you prevent other services running in the cluster to communicate to `payment-provider`?
 
+> ## Part 3: Answers
+> ### Q1:
+> In no particular order, some improvements I would consider before moving to production...
+> 
+> - **improved testing:**  
+>   My testing method is not automated, but even if it were, I am only testing the top-level functionality: I'm checking that everything works together to successfully pay all the invoices.
+>   Following through the code, this invokes lots of individual pieces. For example:
+>     - _invoice-app_ needs to successfully spin up the DB,
+>     - the `getInvoices` function needs to successfully call the `payment-provider::/payments/pay` API
+>     - the DB needs to correctly update the invoice status  
+> 
+>   A better more thorough approach would be to test these fundamental pieces in some isolated way, and building up to the top-level checks.
+>   For simple applications, it doesn't seem so important but for large, complex stacks this can make debugging much easier and help to identify areas where testing is lacking.
+>
+> - **Helm Charts:**  
+>   I would consider if a helm-chart can help simplify the deployment process here.
+>   I've built Charts for deployment of some of our applications and find them much neater/efficient than deployment scripts.
+>   However, I think the real advantage here is in linking configurations across different services.
+>   For example, for _payment-provider_ we build a `service` and specify the `port` and `targetPort`.
+>   The _invoice-app_ needs to know these to build the appropriate URL, if the (hard-coded) values across the two `deployment.yaml` files don't match, the whole process won't work, but not in an obvious way.
+>   With Helm, these can be higher-level variables that are then populated across the YAML objects as needed.
+>   It helps make a consistent environment, and it solidifies (in code) where the variables are referenced and how k8 objects interact with each other.  
+>   On the other hand, these advantages are applicable when both services are contained in a single Helm Chart.
+>   From the simplified setup this seems suitable. 
+>   However if the two services were more complex and, for some reason, were better suited to be separate Helm Charts, it might not be so easy to link the configurations between the two.
+>   
+> - **Solidifying external access:**  
+>   For the challenge purposes, I'm using Minikube (with only 1 node), and `NodePorts` to externalise access.
+>   In production this wouldn't be suitable because it doesn't load-balance over more nodes, and (crucially) the access point to the service is ephemeral as it is based on the `nodeIP`.
+>   Instead, an ingress + controller could be configured to provide a consistent access route to the service, regardless of where it is being hosted at that time.
+> 
+> - **pod-local database**  
+>   I'm not sure if this is by design or by oversight, but the database holding the invoices lives inside the _invoice-app_, of which there are three replicas.
+>   This means there are three independent sets of identical invoices, and calling `invoice-app::/invoices/pay` updates only one of these (chosen by the rules of selection that the service follows).  
+>   This is almost certainly going to be a bad idea, because it's difficult (if not impossible) to specify which of the databases to interact with, meaning trying to track the correct status of invoices becomes very difficult.
+>   Unless there is a good reason for otherwise, it is better to have the database exist as a standalone instance which any replica of _invoice-app_ can access and safely update information in.
+> 
+> - **logging:**  
+>   I would consider adding more logging, particularly around failure.
+>   Right now if the `pay` function within invoice-app `/invoices/pay` API call fails, there is no obvious notification to the user.
+>   For example, if the `HOST:PORT` doesn't exist, the API call seems to fail silently (nothing in the invoice-app logs).
+>   A notification in the logs of a failed call, or some handling of an unknown `HOST:PORT` would help with use and debugging.
+> 
+> ### Q2
+> Depending on the extent of isolation, `namespaces` could provide a solution.
+> If each microservice is assigned it's own namespace, members of the asssociated team can be granted permission to that namespace using RBAC rules.
+> This should provide the isolation needed, but if these microservices need to interact with each other it might cause complications.  
+> I've had services communicate across namespaces before, but I've not had to enforce isolation like the question describes.
+> I'm not sure if maintaining isolation, but allowing particular services to communicate across namespaces, is possible with `namespaces` alone.
+> It might require some additional setup (such as `NetworkPolicies`).
+> 
+> ### Q3
+> In truth, I haven't had much experience with securing individual `Services`, because I've never had to do it.
+> However, I believe `NetworkPolicies` can be used to achieve what the question asks.
+> I don't know exactly how to implement the policies in a way to achieve the result, but I believe `NetworkPolicies` can allow the _payment-provider_ service to reject all traffic except that originating from the _invocie-app_ pods.
+> 
+
+---
+
 ## What matters to us?
 
 Of course, we expect the solution to run, but we also want to know how you work and what matters to you as an engineer.
