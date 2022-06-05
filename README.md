@@ -77,6 +77,29 @@ We would like these 2 apps, `invoice-app` and `payment-provider`, to run in a K8
 5. Complete `deploy.sh` in order to automate all the steps needed to have both apps running in a K8s cluster.
 6. Complete `test.sh` in order to perform tests against your solution and get successful results (all the invoices are paid) via `GET invoices`.
 
+
+> I tried to make the set of commits logical in their progression, and the final version fulfils the requirements.
+> I've added some comments on a couple of the points to try and express my thought-process a little more.
+> 
+> ### Comments on Q1
+> I opted to use `NodePort`, as it was sufficient for the job in this toy setup.
+> If the system was larger (ie: spanning multiple nodes) this wouldn't be sufficient and would need shifting to `LoadBalancer` at least.
+> 
+> ### Comments on Q4
+> 
+> For Q4, I opted to set the invoice-app to read the `HOST:PORT` from environment variables, which means this can be set at deployment time without needing to rebuild the image.
+> I added logging of the full target URL to aid with debugging, but (depending on requirements) it might be worth catching situations where the URL is incorrectly set (or not set at all) and raising somewhere more obvious.
+> I didn't add this in as it felt beyond the scope of the exercise.
+> 
+> ### Comments on Q6  
+> Either by accident or design, the `test.sh` file was not included in the challenge repository.
+> It wasn't a problem as I could back-engineer the simple interactions with the apps, however I don't know if there were specifics on how `test.sh` should look.
+> For example, if the expectation was for `test.sh` to return a `pass|fail`.  
+> My testing consisted of running `make pay` & `make invoice` and physically checking that no invoices remain.
+> From the `README.md` description, I would guess there is a semi-complete script that calls the `/invoices/pay` API, and then checks that the returned dictionary is blank.
+> Scripting this together is not a problem for me, just let me know if this is needed.
+> Given free reign, I would do this using python (my preferred language atm).
+
 ### Part 3 - Questions
 
 Feel free to express your thoughts and share your experiences with real-world examples you worked with in the past.
