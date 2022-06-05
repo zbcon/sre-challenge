@@ -157,15 +157,20 @@ Feel free to express your thoughts and share your experiences with real-world ex
 > ### Q2
 > Depending on the extent of isolation, `namespaces` could provide a solution.
 > If each microservice is assigned it's own namespace, members of the asssociated team can be granted permission to that namespace using RBAC rules.
-> This should provide the isolation needed, but if these microservices need to interact with each other it might cause complications.  
-> I've had services communicate across namespaces before, but I've not had to enforce isolation like the question describes.
-> I'm not sure if maintaining isolation, but allowing particular services to communicate across namespaces, is possible with `namespaces` alone.
-> It might require some additional setup (such as `NetworkPolicies`).
+> This provides the isolation needed, but if these microservices need to interact with each other it might cause complications.    
+> I know full namespaced isolation is possible as I've worked in these environments before, but as I've never had to implement it I would need to look up RBAC specifics to do so.
+> I've also setup microservices to communicate across namespaces, but never with an otherwise completely isolated namespace.
 > 
 > ### Q3
 > In truth, I haven't had much experience with securing individual `Services`, because I've never had to do it.
-> However, I believe `NetworkPolicies` can be used to achieve what the question asks.
-> I don't know exactly how to implement the policies in a way to achieve the result, but I believe `NetworkPolicies` can allow the _payment-provider_ service to reject all traffic except that originating from the _invocie-app_ pods.
+> It's an interesting problem.
+> At first I was thinking along the lines of an ingress with some kind of controller, and setting up certificate authentication (something we've done with one of our microservices).
+> However this only works for external access where we have a central point of access _into_ the cluster.
+> If we are already internal, we can just by-pass the ingress and head straight to the _payment-provider_ app.  
+> So, the trick is to secure any access to the _payment-provider_ app, of which there are two: the permanent `service`, but also the ephemeral `podIP` on which the app is running.
+> I was trying to think of some kubernetes-native method to do this, and thought `NetworkPolicies` might offer a solution.
+> However, looking deeper into it I'm not so sure these can offer a full solution, as it seems `NetworkPolicies` alone are unable to block node-local traffic... meaning anything running on the same node would still be able to reach the _payment-provider_ app.  
+> I suspect to get this kind of security one would need to use some additional technology, like a service mesh (I believe you guys are using Itsio, which is probably how you are solving this problem).
 > 
 
 ---
