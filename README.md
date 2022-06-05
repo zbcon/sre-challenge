@@ -89,6 +89,7 @@ We would like these 2 apps, `invoice-app` and `payment-provider`, to run in a K8
 > ### Comments on Q4
 > 
 > For Q4, I opted to set the invoice-app to read the `HOST:PORT` from environment variables, which means this can be set at deployment time without needing to rebuild the image.
+> I breifly considered using `configMaps`, but decided it was (very much) overkill for this use-case.  
 > I added logging of the full target URL to aid with debugging, but (depending on requirements) it might be worth catching situations where the URL is incorrectly set (or not set at all) and raising somewhere more obvious.
 > I didn't add this in as it felt beyond the scope of the exercise.
 > 
